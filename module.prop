@@ -1,0 +1,7 @@
+id=hw_viewheight_ui
+name=王者荣耀视野高度修改
+version=v6.2
+versionCode=620
+author=暗黑海神王
+description=精准内存扫描 libUnity.so RW区域 + Camera FOV/Height/Distance 定位写入。手动/自动双模式，洛丽塔哥特风格 UI。QQ:3283925838
+uiType=webview

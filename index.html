@@ -1,0 +1,743 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>视野高度 · Gothic Lolita</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600&family=Noto+Serif+SC:wght@400;600&display=swap" rel="stylesheet">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+  --bg: #0d0609;
+  --card: #150a0e;
+  --card-border: #3d1a26;
+  --accent: #c0392b;
+  --accent-bright: #e74c3c;
+  --gold: #d4a843;
+  --gold-dim: #b8923a;
+  --text: #f0e0e4;
+  --muted: #9b7a84;
+  --dark: #6b3d48;
+  --success: #27ae60;
+  --info: #3498db;
+  --warn: #f39c12;
+  --error: #e74c3c;
+}
+
+@media (prefers-color-scheme: light) {
+  :root {
+    --bg: #f5ebe0; --card: #fff8f0; --card-border: #d4b8a8;
+    --accent: #8b1a2a; --accent-bright: #a02a3a;
+    --gold: #b8860b; --gold-dim: #9a720a;
+    --text: #3d1a1f; --muted: #8b6a6f; --dark: #5a2a30;
+  }
+}
+
+body {
+  font-family: 'Noto Serif SC', Georgia, serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  padding: 20px 16px;
+  position: relative;
+}
+
+body::before {
+  content: '';
+  position: fixed; inset: 0;
+  background: 
+    radial-gradient(ellipse at 15% 15%, rgba(192,57,43,0.05) 0%, transparent 50%),
+    radial-gradient(ellipse at 85% 85%, rgba(212,168,67,0.03) 0%, transparent 50%),
+    url("data:image/svg+xml,%3Csvg width='80' height='80' viewBox='0 0 80 80' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23c0392b' fill-opacity='0.015'%3E%3Cpath d='M40 40c0-14.7 11.9-26.7 26.7-26.7S93.3 25.3 93.3 40 81.4 66.7 66.7 66.7 40 54.7 40 40zm0-4c13.3 0 24 10.7 24 24S53.3 88 40 88 16 77.3 16 64 26.7 36 40 36z'/%3E%3C/g%3E%3C/svg%3E");
+  pointer-events: none; z-index: 0;
+}
+
+.container { max-width: 420px; margin: 0 auto; position: relative; z-index: 1; }
+
+.header {
+  text-align: center; margin-bottom: 24px; padding: 16px 0 8px;
+  border-bottom: 1px solid var(--card-border);
+}
+
+.title {
+  font-family: 'Cinzel', serif;
+  font-size: 26px; font-weight: 600;
+  color: var(--gold);
+  letter-spacing: 0.06em; text-shadow: 0 2px 8px rgba(212,168,67,0.2);
+}
+
+.subtitle { font-size: 11px; color: var(--muted); letter-spacing: 0.15em; text-transform: uppercase; margin-top: 4px; }
+
+.card {
+  background: var(--card);
+  border: 1px solid var(--card-border);
+  border-radius: 12px;
+  padding: 18px;
+  margin-bottom: 14px;
+}
+
+.card-title {
+  font-family: 'Cinzel', serif;
+  font-size: 12px; font-weight: 600;
+  color: var(--gold); letter-spacing: 0.1em;
+  margin-bottom: 14px; padding-bottom: 8px;
+  border-bottom: 1px solid var(--card-border);
+}
+
+.current-row { display: flex; justify-content: space-between; align-items: center; padding: 4px 0; }
+.current-label { font-size: 12px; color: var(--muted); }
+.current-value { font-family: 'Cinzel', serif; font-size: 32px; font-weight: 600; color: var(--accent); }
+
+.mode-row { display: flex; gap: 10px; }
+.mode-btn {
+  flex: 1; padding: 14px 10px; text-align: center;
+  background: var(--bg); border: 2px solid var(--card-border);
+  border-radius: 10px; cursor: pointer; transition: 0.2s;
+}
+.mode-btn.active { border-color: var(--accent); background: #1a0c10; }
+.mode-btn .icon { font-size: 22px; margin-bottom: 4px; }
+.mode-btn .label { font-family: 'Cinzel', serif; font-size: 12px; font-weight: 600; color: var(--text); }
+.mode-btn .desc { font-size: 10px; color: var(--muted); }
+
+.options-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.opt-btn {
+  background: var(--bg); border: 2px solid var(--card-border);
+  border-radius: 10px; padding: 16px 8px; text-align: center; cursor: pointer; transition: 0.2s;
+}
+.opt-btn.active { border-color: var(--accent); background: #1a0c10; box-shadow: inset 0 0 0 1px var(--accent); }
+.opt-btn .val { font-family: 'Cinzel', serif; font-size: 24px; font-weight: 600; color: var(--gold); }
+.opt-btn .name { font-size: 10px; color: var(--muted); margin-top: 2px; }
+
+.custom-row { display: flex; gap: 8px; margin-top: 10px; }
+.custom-row input {
+  flex: 1; background: var(--bg); border: 1px solid var(--card-border);
+  border-radius: 8px; padding: 12px; color: var(--text);
+  font-family: 'Cinzel', serif; font-size: 16px; text-align: center;
+}
+.custom-row input:focus { outline: none; border-color: var(--gold); box-shadow: 0 0 0 2px rgba(212,168,67,0.15); }
+.custom-btn {
+  width: 90px; background: linear-gradient(135deg, var(--accent), var(--accent-bright));
+  color: var(--text); border: none; border-radius: 8px; padding: 12px;
+  font-family: 'Cinzel', serif; font-size: 11px; font-weight: 600; letter-spacing: 0.06em; cursor: pointer;
+}
+
+.execute-btn {
+  width: 100%; margin-top: 8px; padding: 16px;
+  background: linear-gradient(135deg, var(--accent), #8b1a2a, var(--accent));
+  color: var(--text); border: 2px solid var(--gold);
+  border-radius: 10px;
+  font-family: 'Cinzel', serif; font-size: 14px; font-weight: 600; letter-spacing: 0.1em;
+  cursor: pointer; transition: 0.2s;
+}
+.execute-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+.execute-btn:not(:disabled):active { transform: scale(0.98); }
+
+.footer { text-align: center; margin-top: 20px; opacity: 0.4; font-size: 16px; color: var(--gold); user-select: none; }
+
+/* ===== Toast 提示 ===== */
+.toast-layer {
+  position: fixed;
+  bottom: 24px; left: 16px; right: 16px;
+  z-index: 9999;
+  pointer-events: none;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: center;
+}
+
+.toast {
+  pointer-events: auto;
+  min-width: 200px;
+  max-width: 360px;
+  background: linear-gradient(135deg, var(--card) 0%, #0f0608 100%);
+  border: 1px solid var(--card-border);
+  border-radius: 10px;
+  padding: 14px 18px;
+  box-shadow: 
+    0 8px 32px rgba(0,0,0,0.5),
+    0 0 0 1px rgba(212,168,67,0.1),
+    inset 0 1px 0 rgba(255,255,255,0.03);
+  transform: translateY(100px);
+  opacity: 0;
+  animation: toastIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards,
+             toastOut 0.3s ease 3.7s forwards;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-family: 'Noto Serif SC', serif;
+  font-size: 13px;
+  color: var(--text);
+}
+
+.toast.success { border-color: var(--success); }
+.toast.info { border-color: var(--info); }
+.toast.warn { border-color: var(--warn); }
+.toast.error { border-color: var(--error); }
+
+.toast::before {
+  content: '';
+  width: 3px; height: 100%;
+  position: absolute; left: 0; top: 0; bottom: 0;
+  border-radius: 10px 0 0 10px;
+}
+.toast.success::before { background: var(--success); }
+.toast.info::before { background: var(--info); }
+.toast.warn::before { background: var(--warn); }
+.toast.error::before { background: var(--error); }
+
+.toast-icon {
+  flex-shrink: 0;
+  width: 24px; height: 24px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 14px;
+}
+.toast.success .toast-icon { color: var(--success); }
+.toast.info .toast-icon { color: var(--info); }
+.toast.warn .toast-icon { color: var(--warn); }
+.toast.error .toast-icon { color: var(--error); }
+
+.toast-content { flex: 1; line-height: 1.5; }
+.toast-title { font-family: 'Cinzel', serif; font-size: 11px; font-weight: 600; color: var(--gold); margin-bottom: 2px; letter-spacing: 0.06em; }
+.toast-msg { font-size: 12px; color: var(--text); }
+
+.toast-progress {
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  height: 3px;
+  border-radius: 0 0 10px 10px;
+  transform-origin: left;
+  animation: progressBar 3.5s linear forwards;
+}
+.toast.success .toast-progress { background: var(--success); }
+.toast.info .toast-progress { background: var(--info); }
+.toast.warn .toast-progress { background: var(--warn); }
+.toast.error .toast-progress { background: var(--error); }
+
+@keyframes toastIn {
+  to { transform: translateY(0); opacity: 1; }
+}
+@keyframes toastOut {
+  to { transform: translateY(-20px); opacity: 0; }
+}
+@keyframes progressBar {
+  from { transform: scaleX(1); }
+  to { transform: scaleX(0); }
+}
+
+/* ===== 自定义 Modal（替代 prompt）===== */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.7);
+  backdrop-filter: blur(4px);
+  display: none;
+  justify-content: center;
+  align-items: center;
+  z-index: 10000;
+  animation: fadeIn 0.2s ease;
+}
+.modal-overlay.show { display: flex; }
+
+.modal-box {
+  background: linear-gradient(145deg, var(--card) 0%, #0f0608 100%);
+  border: 1px solid var(--card-border);
+  border-radius: 16px;
+  padding: 24px;
+  width: 90%;
+  max-width: 360px;
+  box-shadow: 
+    0 20px 60px rgba(0,0,0,0.6),
+    0 0 0 1px rgba(212,168,67,0.15),
+    inset 0 1px 0 rgba(255,255,255,0.05);
+  transform: scale(0.9);
+  animation: modalIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+.modal-overlay.closing .modal-box {
+  animation: modalOut 0.2s ease forwards;
+}
+
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+@keyframes modalIn { to { transform: scale(1); } }
+@keyframes modalOut { to { transform: scale(0.9); opacity: 0; } }
+
+.modal-title {
+  font-family: 'Cinzel', serif;
+  font-size: 18px; font-weight: 600;
+  color: var(--gold);
+  text-align: center;
+  margin-bottom: 8px;
+  letter-spacing: 0.04em;
+}
+
+.modal-subtitle {
+  font-size: 12px; color: var(--muted);
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.modal-input-group {
+  margin-bottom: 20px;
+}
+
+.modal-input-label {
+  display: block;
+  font-size: 12px; color: var(--muted);
+  margin-bottom: 8px;
+  font-family: 'Noto Serif SC', serif;
+}
+
+.modal-input {
+  width: 100%;
+  background: var(--bg);
+  border: 1px solid var(--card-border);
+  border-radius: 10px;
+  padding: 16px 18px;
+  color: var(--text);
+  font-family: 'Cinzel', serif;
+  font-size: 22px;
+  font-weight: 600;
+  text-align: center;
+  letter-spacing: 0.08em;
+  transition: all 0.2s;
+}
+.modal-input:focus {
+  outline: none;
+  border-color: var(--gold);
+  box-shadow: 
+    0 0 0 3px rgba(212,168,67,0.15),
+    inset 0 2px 8px rgba(0,0,0,0.3);
+}
+.modal-input::placeholder { color: var(--dark); }
+
+.modal-slider-wrap {
+  margin: 16px 0 8px;
+}
+.modal-slider {
+  width: 100%;
+  height: 6px;
+  -webkit-appearance: none;
+  appearance: none;
+  background: linear-gradient(90deg, var(--card-border), var(--gold), var(--card-border));
+  border-radius: 3px;
+  outline: none;
+  cursor: pointer;
+}
+.modal-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 24px; height: 24px;
+  border-radius: 50%;
+  background: var(--gold);
+  border: 2px solid var(--card);
+  box-shadow: 0 2px 8px rgba(212,168,67,0.4);
+  cursor: pointer;
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+.modal-slider::-webkit-slider-thumb:hover { transform: scale(1.15); box-shadow: 0 4px 16px rgba(212,168,67,0.6); }
+.modal-slider::-moz-range-thumb {
+  width: 24px; height: 24px;
+  border-radius: 50%;
+  background: var(--gold);
+  border: 2px solid var(--card);
+  box-shadow: 0 2px 8px rgba(212,168,67,0.4);
+}
+.modal-slider-labels {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 6px;
+  font-size: 10px; color: var(--muted);
+  font-family: 'Cinzel', serif;
+}
+
+.modal-actions {
+  display: flex;
+  gap: 12px;
+}
+
+.modal-btn {
+  flex: 1;
+  padding: 14px;
+  border: none;
+  border-radius: 10px;
+  font-family: 'Cinzel', serif;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.modal-btn.cancel {
+  background: var(--bg);
+  border: 1px solid var(--card-border);
+  color: var(--muted);
+}
+.modal-btn.cancel:active { background: var(--card-border); }
+
+.modal-btn.confirm {
+  background: linear-gradient(135deg, var(--accent), var(--accent-bright));
+  color: var(--text);
+  box-shadow: 0 4px 16px rgba(192,57,43,0.3);
+}
+.modal-btn.confirm:active { transform: scale(0.97); }
+
+/* 快捷数值按钮（弹窗内） */
+.modal-quick {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 6px;
+  margin-bottom: 16px;
+}
+.modal-quick-btn {
+  background: var(--bg);
+  border: 1px solid var(--card-border);
+  border-radius: 8px;
+  padding: 10px 4px;
+  font-family: 'Cinzel', serif;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.modal-quick-btn:hover,
+.modal-quick-btn.active {
+  border-color: var(--gold);
+  background: #1a0c10;
+  color: var(--gold);
+}
+
+/* 状态栏 */
+.status { text-align: center; font-size: 11px; color: var(--dark); min-height: 18px; margin-top: 12px; transition: 0.3s; }
+.status.ok { color: var(--gold); text-shadow: 0 0 8px rgba(212,168,67,0.4); }
+
+.hidden { display: none !important; }
+
+/* 入场动画 */
+@keyframes fadeUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+.card { animation: fadeUp 0.5s ease forwards; opacity: 0; }
+.card:nth-child(1){animation-delay:.05s} .card:nth-child(2){animation-delay:.12s} .card:nth-child(3){animation-delay:.19s} .card:nth-child(4){animation-delay:.26s} .card:nth-child(5){animation-delay:.33s}
+.header { animation: fadeUp 0.4s ease; }
+.footer { animation: fadeUp 0.6s ease .4s forwards; opacity: 0; }
+
+@media (prefers-reduced-motion: reduce) { *,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important} }
+</style>
+</head>
+<body>
+<div class="container">
+  <header class="header">
+    <h1 class="title">视野高度</h1>
+    <p class="subtitle">King of Glory View Height</p>
+  </header>
+
+  <div class="card">
+    <div class="current-row">
+      <span class="current-label">当前视野</span>
+      <span class="current-value" id="curVal">-- 米</span>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">执行模式</div>
+    <div class="mode-row">
+      <button class="mode-btn active" data-mode="manual" onclick="setMode('manual')">
+        <div class="icon">⚔</div><div class="label">立即执行</div><div class="desc">点选即刻生效</div>
+      </button>
+      <button class="mode-btn" data-mode="auto" onclick="setMode('auto')">
+        <div class="icon">🌙</div><div class="label">游戏自动</div><div class="desc">启动时自动注入</div>
+      </button>
+    </div>
+  </div>
+
+  <div class="card" id="secManual">
+    <div class="card-title">预设视野</div>
+    <div class="options-grid" id="opts"></div>
+    <div class="custom-row">
+      <input type="number" id="cstIn" placeholder="10-50" min="10" max="50" inputmode="numeric">
+      <button class="custom-btn" onclick="setCustom()">设定</button>
+    </div>
+  </div>
+
+  <div class="card hidden" id="secAuto">
+    <div class="card-title">自动执行</div>
+    <div style="color:var(--muted);font-size:12px;line-height:1.8">
+      已选：打开王者荣耀自动应用设定高度<br>
+      上方选择目标高度 → 点下方保存配置<br>
+      后台检测游戏启动自动注入<br>
+      <span style="color:var(--accent)">需模块启用并重启手机生效</span>
+    </div>
+  </div>
+
+  <button class="execute-btn" id="exeBtn" onclick="execute()">立即应用视野高度</button>
+  <div class="status" id="st">等待操作...</div>
+  <div class="footer">✦ ✧ ✦ ✧ ✦</div>
+</div>
+
+<!-- Toast 层 -->
+<div class="toast-layer" id="toastLayer"></div>
+
+<!-- 自定义 Modal（替代 prompt） -->
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal-box">
+    <h3 class="modal-title" id="modalTitle">设置视野高度</h3>
+    <p class="modal-subtitle" id="modalSubtitle">输入 10-50 之间的数值</p>
+    
+    <!-- 快捷数值 -->
+    <div class="modal-quick" id="modalQuick"></div>
+    
+    <!-- 输入框 + 滑块 -->
+    <div class="modal-input-group">
+      <label class="modal-input-label">自定义数值</label>
+      <input type="number" class="modal-input" id="modalInput" placeholder="25" min="10" max="50" inputmode="numeric">
+      <div class="modal-slider-wrap">
+        <input type="range" class="modal-slider" id="modalSlider" min="10" max="50" value="25">
+        <div class="modal-slider-labels">
+          <span>10</span><span>20</span><span>30</span><span>40</span><span>50</span>
+        </div>
+      </div>
+    </div>
+    
+    <div class="modal-actions">
+      <button class="modal-btn cancel" onclick="closeModal()">取消</button>
+      <button class="modal-btn confirm" onclick="confirmModal()">确定</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const KV = { manual: '立即执行', auto: '游戏自动执行' };
+let mode = 'manual', height = 20;
+
+const toastLayer = document.getElementById('toastLayer');
+const modalOverlay = document.getElementById('modalOverlay');
+const modalInput = document.getElementById('modalInput');
+const modalSlider = document.getElementById('modalSlider');
+const modalQuick = document.getElementById('modalQuick');
+let modalResolve = null;
+
+/* ===== Toast ===== */
+function showToast(type, title, msg) {
+  const t = document.createElement('div');
+  t.className = 'toast ' + type;
+  const icons = { success: '✦', info: '✧', warn: '◆', error: '✗' };
+  t.innerHTML = `
+    <span class="toast-icon">${icons[type] || '✧'}</span>
+    <div class="toast-content">
+      <div class="toast-title">${title}</div>
+      <div class="toast-msg">${msg}</div>
+    </div>
+    <div class="toast-progress"></div>
+  `;
+  toastLayer.appendChild(t);
+  setTimeout(() => t.remove(), 4200);
+}
+
+/* ===== Modal ===== */
+function openModal(title, subtitle, currentVal) {
+  document.getElementById('modalTitle').textContent = title;
+  document.getElementById('modalSubtitle').textContent = subtitle;
+  modalInput.value = currentVal;
+  modalSlider.value = currentVal;
+  
+  // 快捷按钮
+  modalQuick.innerHTML = '';
+  [15,20,25,30,35].forEach(v => {
+    const b = document.createElement('button');
+    b.className = 'modal-quick-btn' + (v === currentVal ? ' active' : '');
+    b.textContent = v;
+    b.onclick = () => {
+      modalInput.value = v;
+      modalSlider.value = v;
+      document.querySelectorAll('.modal-quick-btn').forEach(x => x.classList.toggle('active', x === b));
+    };
+    modalQuick.appendChild(b);
+  });
+  
+  // 同步输入框 <-> 滑块
+  const sync = () => { modalSlider.value = modalInput.value; updateQuickActive(); };
+  modalInput.oninput = sync;
+  modalSlider.oninput = () => { modalInput.value = modalSlider.value; updateQuickActive(); };
+  
+  modalOverlay.classList.add('show');
+  modalOverlay.classList.remove('closing');
+  modalInput.focus();
+  
+  return new Promise(resolve => { modalResolve = resolve; });
+}
+
+function closeModal() {
+  modalOverlay.classList.add('closing');
+  modalOverlay.classList.remove('show');
+  setTimeout(() => {
+    if (modalResolve) { modalResolve(null); modalResolve = null; }
+  }, 200);
+}
+
+function confirmModal() {
+  const v = parseInt(modalInput.value);
+  if (isNaN(v) || v < 10 || v > 50) {
+    showToast('error', '输入错误', '请输入 10-50 之间的数字');
+    modalInput.focus(); return;
+  }
+  if (modalResolve) { modalResolve(v); modalResolve = null; }
+  closeModal();
+}
+
+function updateQuickActive() {
+  const v = parseInt(modalInput.value);
+  document.querySelectorAll('.modal-quick-btn').forEach(b => 
+    b.classList.toggle('active', parseInt(b.textContent) === v)
+  );
+}
+
+/* ===== 纯文件通道核心逻辑 ===== */
+const CMD_FILE = '/data/local/tmp/view_height/command.txt';
+
+function send(cmd, val) {
+  const data = JSON.stringify({cmd, val});
+  const labels = { set_height: '设置视野高度', set_mode: '切换执行模式', get_status: '获取状态' };
+  
+  // 尝试多种方式写入命令文件
+  writeCommandFile(data).then(success => {
+    if (success) {
+      showToast('success', '文件通道', `${labels[cmd] || cmd}: ${val} ✓`);
+    } else {
+      showToast('warn', '需手动同步', '点击下方「同步到模块」按钮复制命令');
+      showManualSyncBtn(data, labels[cmd] || cmd, val);
+    }
+  });
+}
+
+// 尝试写入命令文件（多种方式）
+async function writeCommandFile(data) {
+  // 方法 1: sendBeacon
+  if (navigator.sendBeacon) {
+    try {
+      navigator.sendBeacon(`file://${CMD_FILE}`, new Blob([data], {type: 'application/json'}));
+      await sleep(300);
+      return true;
+    } catch (e) {}
+  }
+  
+  // 方法 2: 表单提交
+  try {
+    const form = document.createElement('form');
+    form.method = 'POST';
+    form.action = `file://${CMD_FILE}`;
+    form.enctype = 'application/json';
+    form.style.display = 'none';
+    const input = document.createElement('input');
+    input.name = 'data';
+    input.value = data;
+    form.appendChild(input);
+    document.body.appendChild(form);
+    form.submit();
+    document.body.removeChild(form);
+    await sleep(300);
+    return true;
+  } catch (e) {}
+  
+  // 方法 3: localStorage 触发
+  try {
+    localStorage.setItem('KSU_CMD_' + Date.now(), data);
+    localStorage.removeItem('KSU_CMD_' + Date.now());
+    await sleep(300);
+    return true;
+  } catch (e) {}
+  
+  return false;
+}
+
+function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+// 显示手动同步按钮
+function showManualSyncBtn(data, label, val) {
+  const existing = document.getElementById('manualSyncBtn');
+  if (existing) existing.remove();
+  
+  const btn = document.createElement('button');
+  btn.id = 'manualSyncBtn';
+  btn.className = 'execute-btn';
+  btn.style.marginTop = '12px';
+  btn.style.background = 'linear-gradient(135deg, var(--warn), var(--gold))';
+  btn.innerHTML = '📋 同步到模块 (复制命令)';
+  btn.onclick = () => copyCommand(data, label, val);
+  document.getElementById('exeBtn').parentNode.insertBefore(btn, document.getElementById('exeBtn').nextSibling);
+  
+  setTimeout(() => { if (btn.parentNode) btn.remove(); }, 30000);
+}
+
+// 复制命令到剪贴板
+function copyCommand(data, label, val) {
+  navigator.clipboard.writeText(data).then(() => {
+    showToast('success', '已复制', `${label}: ${val}\n请粘贴到 ${CMD_FILE}`);
+  }).catch(() => {
+    showToast('error', '复制失败', '请手动复制: ' + data);
+  });
+}
+
+function setMode(m) {
+  mode = m;
+  document.querySelectorAll('.mode-btn').forEach(b => b.classList.toggle('active', b.dataset.mode === m));
+  document.getElementById('secManual').classList.toggle('hidden', m !== 'manual');
+  document.getElementById('secAuto').classList.toggle('hidden', m !== 'auto');
+  document.getElementById('exeBtn').textContent = m === 'manual' ? '立即应用视野高度' : '保存自动执行配置';
+  showToast('info', '模式切换', KV[m]);
+}
+
+function pick(h) {
+  height = h;
+  send('set_height', h);
+  document.querySelectorAll('.opt-btn').forEach(b => b.classList.toggle('active', b.dataset.val == h));
+  document.getElementById('curVal').textContent = h + ' 米';
+  showToast('success', '视野高度', `${h} 米 ${mode==='manual'?'（立即生效）':'（游戏启动自动应用）'}`);
+}
+
+async function setCustom() {
+  const v = await openModal('自定义视野高度', '输入 10-50 之间的数值，或点击下方快捷按钮', height);
+  if (v !== null) pick(v);
+}
+
+function execute() {
+  const btn = document.getElementById('exeBtn');
+  btn.disabled = true; btn.textContent = mode === 'manual' ? '应用中...' : '保存中...';
+  send('set_mode', mode);
+  send('set_height', height);
+  setTimeout(() => {
+    btn.disabled = false; btn.textContent = mode === 'manual' ? '立即应用视野高度' : '保存自动执行配置';
+    showToast(mode === 'manual' ? 'success' : 'warn',
+      mode === 'manual' ? '应用成功' : '配置已保存',
+      mode === 'manual' ? '视野高度已生效！' : '下次打开游戏自动应用');
+  }, 800);
+}
+
+function setStatus(msg, active) {
+  const el = document.getElementById('st');
+  el.textContent = msg; el.classList.toggle('ok', active);
+  if (active) setTimeout(() => el.classList.remove('ok'), 3000);
+}
+
+/* 初始化预设按钮 */
+[15,20,25,30,35].forEach((v,i) => {
+  const b = document.createElement('button');
+  b.className = 'opt-btn' + (v===20?' active':'');
+  b.dataset.val = v;
+  b.innerHTML = '<div class="val">' + v + '</div><div class="name">' + ['默认','中等','较大','超大','极限'][i] + '视野</div>';
+  b.onclick = () => pick(v);
+  document.getElementById('opts').appendChild(b);
+});
+
+/* ESC 关闭弹窗 */
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+
+/* 点击遮罩关闭 */
+modalOverlay.addEventListener('click', e => { if (e.target === modalOverlay) closeModal(); });
+
+/* 启动时获取状态 */
+send('get_status', 0);
+</script>
+</body>
+</html>
